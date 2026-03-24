@@ -1,55 +1,51 @@
-Use Case 8: Booking History & Reporting
+Use Case 9: Error Handling & Validation
 Goal
 
-Introduce historical tracking of confirmed bookings to provide operational visibility, enable audits, and support reporting, reinforcing a persistence-oriented mindset without introducing external storage.
+Strengthen system reliability by introducing structured validation and error handling, ensuring that invalid inputs and inconsistent states are detected and handled early.
 
 Actor
 
-Admin – reviews booking history and reports for operational purposes.
-Booking History – maintains a record of confirmed reservations.
-Booking Report Service – generates summaries and reports from stored booking data.
+Guest – provides booking input that must be validated.
+Invalid Booking Validator – validates input and system state before processing requests.
 
 Flow
-A booking is successfully confirmed.
-The confirmed reservation is added to booking history.
-Booking history maintains records in insertion order.
-Admin requests booking information or reports.
-Stored reservations are retrieved and displayed as required.
+Guest provides booking input.
+System validates input values and system constraints.
+If validation fails, an error is raised immediately.
+A meaningful failure message is displayed.
+The system prevents invalid state changes and continues running safely.
 Key Concepts Used
 
-Operational Visibility
-Real systems require visibility into past transactions. Historical data allows administrators to understand system usage and behavior.
+Input Validation
+Validation ensures that incoming data conforms to expected rules before processing. This prevents invalid or inconsistent data from entering the system.
 
-List Data Structure
-A List<Reservation> is used to store confirmed bookings. Lists preserve insertion order, making them suitable for chronological records.
+Custom Exceptions
+Domain-specific exceptions are used to represent invalid booking scenarios. Custom exceptions make error causes explicit and improve code readability.
 
-Ordered Storage
-Bookings are stored in the order they are confirmed. This naturally reflects real-world timelines and supports sequential reporting.
+Fail-Fast Design
+The system detects errors as early as possible and stops further processing. This avoids cascading failures and simplifies debugging.
 
-Historical Tracking
-Once stored, bookings form an audit trail. This enables later review, analysis, and verification of system actions.
+Guarding System State
+Checks are performed before inventory updates or allocations. This ensures that critical state, such as availability counts, remains valid.
 
-Reporting Readiness
-Storing structured booking data prepares the system for reporting. Reports can be generated without reprocessing live booking flows.
+Graceful Failure Handling
+Errors are communicated clearly without crashing the application. This improves system usability and maintainability.
 
-Separation of Data Storage and Reporting
-Booking history focuses on storing data. Reporting logic is delegated to a separate service, reducing coupling.
-
-Persistence Mindset (Without Storage Medium)
-Although data is stored in memory, the system treats history as long-lived information. This prepares learners conceptually for file-based or database persistence in later stages.
+Correctness over Happy Path
+The system is designed to handle incorrect usage, not just ideal scenarios. This reflects real-world conditions where invalid input is common.
 
 Key Requirements
-Store each confirmed reservation in booking history.
-Maintain bookings in the order they are confirmed.
-Allow retrieval of stored reservations for review.
-Generate summary reports from booking history.
-Ensure reporting does not modify stored booking data.
+Validate room types before processing bookings.
+Prevent inventory from reaching invalid or negative values.
+Throw and handle custom exceptions for invalid scenarios.
+Display clear and informative failure messages.
+Ensure the system remains stable after errors.
 Key Benefits
-Maintains booking history in chronological order
-Supports audit and review of confirmed reservations
-Enables reporting without affecting stored data
-Builds a foundation for future persistence features
+Improves booking reliability
+Prevents invalid system state changes
+Makes failures easier to understand
+Keeps the application stable even when errors occur
 Drawbacks of Previous Use Case
-Previous use case supported optional services but did not preserve historical booking records.
-No audit trail existed for confirmed reservations.
-Reporting could not be generated because past bookings were not stored centrally.
+Previous use case stored booking history but did not validate bad booking input.
+Invalid room types or inconsistent inventory states could still enter the flow.
+Error conditions were not modeled explicitly through custom exceptions.
