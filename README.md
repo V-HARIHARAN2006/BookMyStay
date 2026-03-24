@@ -1,52 +1,55 @@
-Use Case 7: Add-On Service Selection
+Use Case 8: Booking History & Reporting
 Goal
 
-Extend the booking model to support optional services, demonstrating how real-world business features can be added without modifying core booking or allocation logic.
+Introduce historical tracking of confirmed bookings to provide operational visibility, enable audits, and support reporting, reinforcing a persistence-oriented mindset without introducing external storage.
 
 Actor
 
-Guest – selects optional services for an existing reservation.
-Add-On Service – represents an individual optional offering.
-Add-On Service Manager – manages the association between reservations and selected services.
+Admin – reviews booking history and reports for operational purposes.
+Booking History – maintains a record of confirmed reservations.
+Booking Report Service – generates summaries and reports from stored booking data.
 
 Flow
-Guest selects one or more add-on services.
-Selected services are added to a list.
-The list of services is mapped to the corresponding reservation ID.
-Additional cost for the reservation is calculated.
-Core booking and inventory state remain unchanged.
+A booking is successfully confirmed.
+The confirmed reservation is added to booking history.
+Booking history maintains records in insertion order.
+Admin requests booking information or reports.
+Stored reservations are retrieved and displayed as required.
 Key Concepts Used
 
-Business Extensibility
-Real-world bookings often include additional offerings beyond the primary product. The system must support new features without disrupting existing logic.
+Operational Visibility
+Real systems require visibility into past transactions. Historical data allows administrators to understand system usage and behavior.
 
-One-to-Many Relationship
-A single reservation can have multiple associated services. This relationship is modeled using a map from reservation ID to a list of services.
+List Data Structure
+A List<Reservation> is used to store confirmed bookings. Lists preserve insertion order, making them suitable for chronological records.
 
-Map and List Combination
-Map<String, List<Service>> allows efficient lookup of services for a reservation. Lists preserve insertion order and allow multiple services to be attached.
+Ordered Storage
+Bookings are stored in the order they are confirmed. This naturally reflects real-world timelines and supports sequential reporting.
 
-Composition over Inheritance
-Services are composed with reservations rather than inherited. This avoids rigid class hierarchies and supports flexible feature growth.
+Historical Tracking
+Once stored, bookings form an audit trail. This enables later review, analysis, and verification of system actions.
 
-Separation of Core and Optional Features
-Add-on services are managed independently of room allocation and inventory. This prevents optional features from complicating critical booking workflows.
+Reporting Readiness
+Storing structured booking data prepares the system for reporting. Reports can be generated without reprocessing live booking flows.
 
-Cost Aggregation
-Service costs are calculated separately and combined when needed. This keeps pricing logic modular and easier to extend.
+Separation of Data Storage and Reporting
+Booking history focuses on storing data. Reporting logic is delegated to a separate service, reducing coupling.
+
+Persistence Mindset (Without Storage Medium)
+Although data is stored in memory, the system treats history as long-lived information. This prepares learners conceptually for file-based or database persistence in later stages.
 
 Key Requirements
-Allow multiple services to be attached to a single reservation.
-Store selected services using a reservation-to-services mapping.
-Calculate total additional cost for selected services.
-Ensure add-on logic does not modify booking or inventory state.
-Support easy addition of new service types.
+Store each confirmed reservation in booking history.
+Maintain bookings in the order they are confirmed.
+Allow retrieval of stored reservations for review.
+Generate summary reports from booking history.
+Ensure reporting does not modify stored booking data.
 Key Benefits
-Supports optional business features cleanly
-Keeps booking and inventory logic unchanged
-Allows multiple services per reservation
-Makes pricing extensible and modular
+Maintains booking history in chronological order
+Supports audit and review of confirmed reservations
+Enables reporting without affecting stored data
+Builds a foundation for future persistence features
 Drawbacks of Previous Use Case
-Previous use case confirmed reservations but handled only core booking data.
-No support existed for optional guest services.
-Business feature expansion would have required mixing service logic into booking logic.
+Previous use case supported optional services but did not preserve historical booking records.
+No audit trail existed for confirmed reservations.
+Reporting could not be generated because past bookings were not stored centrally.
