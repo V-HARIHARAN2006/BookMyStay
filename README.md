@@ -1,56 +1,48 @@
-# BookMyStay
-//running procedure
+Use Case 2: Basic Room Types & Static Availability
+Goal
 
-This project is developed step by step, where each use case adds one new concept from Core Java and Data Structures. The system begins with basic hotel and room management, then gradually includes room booking, customer handling, availability checking, cancellation, payment flow, and booking history. Each stage is designed to show how the application grows from a simple structure into a more organized and scalable hotel booking system.
+Introduce object modeling through inheritance and abstraction before introducing data structures, allowing students to focus on domain design rather than optimization.
 
-//flow of project
+Actor
 
-The flow of the project starts with storing hotel and room details in the system. Customers can search available rooms, select room types, and make bookings. Once a booking is confirmed, room availability is updated immediately to avoid conflicts. The system also supports cancellation, payment tracking, and booking record management. Internally, the project demonstrates how data moves through different structures and classes to maintain consistency and proper booking flow.
+User – runs the application to view predefined room types and their availability.
 
-//objective
+Flow
+User runs the application.
+Room objects representing different room types are created.
+Availability for each room type is stored using simple variables.
+Room details and availability information are printed to the console.
+Application terminates.
+Key Concepts Used
 
-The main objective of the BookMyStay App is to design and implement a Hotel Booking Management System using Core Java and Data Structures. The project aims to show how programming concepts can be applied to solve real-world hotel reservation problems such as room allocation, booking management, customer record handling, and preventing duplicate or invalid bookings. It also helps learners understand how software systems are built in an organized and practical way.
+Abstract Class
+An abstract class is used to represent a generalized concept that should not be instantiated directly. The Room class defines common attributes and behavior shared by all room types while enforcing a consistent structure.
 
-//what are topics it will be covered
-
-This project covers important concepts from Core Java, Object-Oriented Programming, and Data Structures. The major topics included are:
-
-Classes and Objects
-Encapsulation
 Inheritance
+Concrete room classes (SingleRoom, DoubleRoom, SuiteRoom) extend the abstract Room class. This allows shared properties to be reused while enabling specialization for each room type.
+
 Polymorphism
-Abstraction
-Arrays and ArrayList
-LinkedList
-Stack
-Queue
-HashSet
-HashMap
-Exception Handling
-File Handling
-Interfaces
-Strategy Pattern
-Searching and Sorting concepts
-Modular design and refactoring
+Room objects are referenced using the Room type, enabling uniform handling of different room implementations. This prepares the system for future extensibility without changing client code.
 
-These topics are introduced through meaningful hotel booking operations so that learners can understand their real-time usage.
+Encapsulation
+Room attributes such as number of beds, size, and price are encapsulated within the Room class. This ensures that room characteristics are controlled and modified only through defined behavior.
 
-//which usecase
+Static Availability Representation
+Room availability is stored using simple variables rather than data structures. This intentionally highlights the limitations of hardcoded and scattered state management.
 
-Some important use cases covered in the BookMyStay App are:
+Separation of Domain and State
+Room objects represent what a room is, while availability variables represent current system state. This distinction becomes critical when inventory management is introduced later.
 
-Add hotel details
-Add and manage room details
-Search rooms based on type or availability
-Book a room for a customer
-Cancel a booking
-Maintain booking history
-Track customer records
-Handle payment details
-Prevent duplicate booking entries
-Manage waiting list for unavailable rooms
-Generate simple booking summary
-Compare room allocation or search approaches for better performance
-short project description
-
-BookMyStay App is a console-based hotel booking management system developed using Core Java and Data Structures. The application demonstrates how real-world booking operations can be implemented using proper object-oriented principles and efficient data handling techniques. It helps learners understand the practical importance of Java concepts by connecting theory with a hotel reservation domain
+Key Requirements
+Define an abstract Room class with common attributes.
+Create concrete room classes for SingleRoom, DoubleRoom, and SuiteRoom.
+Initialize room objects in the application entry point.
+Store room availability using individual variables.
+Display room details and availability to the console.
+Key Benefits
+Clear introduction to object-oriented domain modeling
+Demonstrates inheritance and abstraction in a real-world context
+Establishes a strong foundation for later inventory refactoring
+Drawbacks of Previous Use Case
+Use Case 1 focused only on application startup and execution flow.
+No domain modeling or business concepts were introduced, limiting system realism.
