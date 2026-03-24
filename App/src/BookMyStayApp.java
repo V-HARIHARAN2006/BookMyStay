@@ -1,5 +1,6 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 class Reservation {
     private String reservationId;
@@ -7,6 +8,7 @@ class Reservation {
     private String roomType;
     private String assignedRoomId;
     private boolean confirmed;
+    private boolean cancelled;
 
     public Reservation(String reservationId, String guestName, String roomType, String assignedRoomId, boolean confirmed) {
         this.reservationId = reservationId;
@@ -14,6 +16,7 @@ class Reservation {
         this.roomType = roomType;
         this.assignedRoomId = assignedRoomId;
         this.confirmed = confirmed;
+        this.cancelled = false;
     }
 
     public String getReservationId() {
@@ -36,94 +39,140 @@ class Reservation {
         return confirmed;
     }
 
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void cancelReservation() {
+        this.cancelled = true;
+        this.confirmed = false;
+    }
+
     public void displayReservation() {
         System.out.println("Reservation ID: " + reservationId);
         System.out.println("Guest Name: " + guestName);
         System.out.println("Room Type: " + roomType);
         System.out.println("Assigned Room ID: " + assignedRoomId);
-        System.out.println("Status: " + (confirmed ? "Confirmed" : "Pending"));
+        System.out.println("Confirmed: " + confirmed);
+        System.out.println("Cancelled: " + cancelled);
+    }
+}
+
+class RoomInventory {
+    private Map<String, Integer> availability;
+
+    public RoomInventory() {
+        availability = new HashMap<>();
+        availability.put("Single Room", 0);
+        availability.put("Double Room", 1);
+        availability.put("Suite Room", 1);
+    }
+
+    public void incrementAvailability(String roomType) {
+        int current = availability.getOrDefault(roomType, 0);
+        availability.put(roomType, current + 1);
+    }
+
+    public void displayInventory() {
+        System.out.println("Current Inventory:");
+        for (Map.Entry<String, Integer> entry : availability.entrySet()) {
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
     }
 }
 
 class BookingHistory {
-    private List<Reservation> confirmedBookings;
+    private Map<String, Reservation> reservations;
 
     public BookingHistory() {
-        confirmedBookings = new ArrayList<>();
+        reservations = new HashMap<>();
     }
 
-    public void addConfirmedReservation(Reservation reservation) {
-        if (reservation.isConfirmed()) {
-            confirmedBookings.add(reservation);
-        }
+    public void addReservation(Reservation reservation) {
+        reservations.put(reservation.getReservationId(), reservation);
     }
 
-    public List<Reservation> getConfirmedBookings() {
-        return confirmedBookings;
+    public Reservation getReservation(String reservationId) {
+        return reservations.get(reservationId);
     }
 
-    public void displayBookingHistory() {
+    public void displayHistory() {
         System.out.println("Booking History:");
-        System.out.println();
-
-        if (confirmedBookings.isEmpty()) {
-            System.out.println("No confirmed bookings available.");
-            return;
-        }
-
-        for (Reservation reservation : confirmedBookings) {
+        for (Reservation reservation : reservations.values()) {
             reservation.displayReservation();
             System.out.println();
         }
     }
 }
 
-class BookingReportService {
-    public void generateSummaryReport(List<Reservation> reservations) {
-        System.out.println("Booking Summary Report");
-        System.out.println();
+class CancellationService {
+    private RoomInventory inventory;
+    private BookingHistory bookingHistory;
+    private Stack<String> rollbackStack;
 
-        int totalBookings = reservations.size();
-        int singleRoomCount = 0;
-        int doubleRoomCount = 0;
-        int suiteRoomCount = 0;
+    public CancellationService(RoomInventory inventory, BookingHistory bookingHistory) {
+        this.inventory = inventory;
+        this.bookingHistory = bookingHistory;
+        this.rollbackStack = new Stack<>();
+    }
 
-        for (Reservation reservation : reservations) {
-            if (reservation.getRoomType().equals("Single Room")) {
-                singleRoomCount++;
-            } else if (reservation.getRoomType().equals("Double Room")) {
-                doubleRoomCount++;
-            } else if (reservation.getRoomType().equals("Suite Room")) {
-                suiteRoomCount++;
-            }
+    public void cancelBooking(String reservationId) {
+        Reservation reservation = bookingHistory.getReservation(reservationId);
+
+        if (reservation == null) {
+            System.out.println("Cancellation failed: Reservation ID " + reservationId + " does not exist.");
+            return;
         }
 
-        System.out.println("Total Confirmed Bookings: " + totalBookings);
-        System.out.println("Single Room Bookings: " + singleRoomCount);
-        System.out.println("Double Room Bookings: " + doubleRoomCount);
-        System.out.println("Suite Room Bookings: " + suiteRoomCount);
+        if (!reservation.isConfirmed()) {
+            System.out.println("Cancellation failed: Reservation ID " + reservationId + " is not an active confirmed booking.");
+            return;
+        }
+
+        if (reservation.isCancelled()) {
+            System.out.println("Cancellation failed: Reservation ID " + reservationId + " has already been cancelled.");
+            return;
+        }
+
+        rollbackStack.push(reservation.getAssignedRoomId());
+        inventory.incrementAvailability(reservation.getRoomType());
+        reservation.cancelReservation();
+
+        System.out.println("Cancellation successful for Reservation ID: " + reservationId);
+        System.out.println("Released Room ID: " + rollbackStack.peek());
+    }
+
+    public void displayRollbackStack() {
+        System.out.println("Rollback Stack: " + rollbackStack);
     }
 }
 
 public class BookMyStayApp {
     public static void main(String[] args) {
+        RoomInventory inventory = new RoomInventory();
         BookingHistory bookingHistory = new BookingHistory();
-        BookingReportService reportService = new BookingReportService();
+        CancellationService cancellationService = new CancellationService(inventory, bookingHistory);
 
         Reservation reservation1 = new Reservation("R101", "Hari", "Single Room", "SR1", true);
         Reservation reservation2 = new Reservation("R102", "Arun", "Double Room", "DR1", true);
-        Reservation reservation3 = new Reservation("R103", "Priya", "Suite Room", "SU1", true);
-        Reservation reservation4 = new Reservation("R104", "Meena", "Single Room", "SR2", true);
+        Reservation reservation3 = new Reservation("R103", "Priya", "Suite Room", "SU1", false);
 
-        bookingHistory.addConfirmedReservation(reservation1);
-        bookingHistory.addConfirmedReservation(reservation2);
-        bookingHistory.addConfirmedReservation(reservation3);
-        bookingHistory.addConfirmedReservation(reservation4);
+        bookingHistory.addReservation(reservation1);
+        bookingHistory.addReservation(reservation2);
+        bookingHistory.addReservation(reservation3);
 
-        System.out.println("Book My Stay App - UC8 Booking History & Reporting");
+        System.out.println("Book My Stay App - UC10 Booking Cancellation & Inventory Rollback");
         System.out.println();
 
-        bookingHistory.displayBookingHistory();
-        reportService.generateSummaryReport(bookingHistory.getConfirmedBookings());
+        cancellationService.cancelBooking("R101");
+        cancellationService.cancelBooking("R999");
+        cancellationService.cancelBooking("R103");
+        cancellationService.cancelBooking("R101");
+
+        System.out.println();
+        inventory.displayInventory();
+        System.out.println();
+        bookingHistory.displayHistory();
+        cancellationService.displayRollbackStack();
     }
 }

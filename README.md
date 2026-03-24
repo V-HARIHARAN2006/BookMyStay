@@ -1,52 +1,51 @@
-Use Case 10: Booking Cancellation & Inventory Rollback
+Use Case 11: Concurrent Booking Simulation
 Goal
 
-Enable safe cancellation of confirmed bookings by correctly reversing system state changes, ensuring inventory consistency and predictable recovery behavior.
+Demonstrate how concurrent access to shared resources can lead to inconsistent system state and show how synchronization ensures correctness under multi-user conditions.
 
 Actor
 
-Guest – initiates a cancellation request for an existing booking.
-Cancellation Service – validates cancellations and performs controlled rollback operations.
+Multiple Guests – submit booking requests concurrently.
+Concurrent Booking Processor – processes booking requests in a multi-threaded environment.
 
 Flow
-Guest initiates a cancellation request.
-The system validates the reservation to ensure it exists and is cancellable.
-The allocated room ID is recorded in a rollback structure.
-Inventory count for the corresponding room type is incremented.
-Booking history is updated to reflect the cancellation.
-System state is restored consistently.
+Multiple guests submit booking requests simultaneously.
+Requests are added to a shared booking queue.
+Threads retrieve requests using synchronized access.
+Room allocation and inventory updates are performed inside critical sections.
+The system completes allocations without conflicts or inconsistencies.
 Key Concepts Used
 
-State Reversal
-Cancellation requires undoing previously completed operations. The system must revert inventory and booking state without introducing inconsistencies.
+Race Conditions
+Race conditions occur when multiple threads access and modify shared data simultaneously. The final system state becomes dependent on execution timing rather than logic.
 
-Stack Data Structure
-A Stack<String> is used to track recently released room IDs. Stacks follow a Last-In-First-Out (LIFO) order, which naturally models rollback behavior.
+Thread Safety
+Thread safety ensures that shared resources behave correctly when accessed by multiple threads. This is critical in systems handling concurrent user actions.
 
-LIFO Rollback Logic
-The most recent allocation is the first to be reversed. This aligns with real-world undo operations and simplifies recovery logic.
+Shared Mutable State
+The booking queue and inventory are shared across threads. Uncontrolled access to shared mutable data can corrupt system state.
 
-Controlled Mutation
-State changes during cancellation are performed in a strict, predefined order. This prevents partial rollbacks and protects system integrity.
+Critical Sections
+Critical sections are blocks of code that must be executed by only one thread at a time. Synchronization ensures exclusive access to these sections.
 
-Inventory Restoration
-Inventory counts are incremented immediately after cancellation. This ensures availability accurately reflects the current system state.
+Synchronized Access
+Synchronization mechanisms are used to protect shared resources. This prevents interleaving operations that could lead to double allocation.
 
-Validation of Cancellation Requests
-The system verifies that a reservation exists before allowing cancellation. Invalid or duplicate cancellation attempts are rejected safely.
+Concurrency vs. Parallelism
+Concurrency focuses on correctness when tasks overlap in time. This use case emphasizes correctness over performance optimization.
 
 Key Requirements
-Allow cancellation of confirmed bookings only.
-Validate reservation existence before performing rollback.
-Release allocated room IDs back to the availability pool.
-Restore inventory counts accurately and immediately.
-Prevent cancellation of non-existent or already cancelled bookings.
+Simulate multiple booking requests occurring at the same time.
+Use shared data structures for booking requests and inventory.
+Ensure inventory updates are performed in a thread-safe manner.
+Prevent double allocation under concurrent execution.
+Maintain consistent system state under load.
 Key Benefits
-Safely reverses confirmed bookings
-Restores inventory consistently
-Prevents duplicate or invalid cancellations
-Demonstrates rollback logic using stack behavior
+Demonstrates real-world concurrent booking behavior
+Prevents double allocation through synchronization
+Maintains correct inventory under simultaneous access
+Introduces thread safety in a practical scenario
 Drawbacks of Previous Use Case
-Previous use case validated booking input but did not support undoing confirmed reservations.
-Once inventory was decremented, no recovery path existed.
-The system lacked controlled rollback behavior for cancellations
+Previous use case handled cancellation and rollback in a single-threaded flow.
+It did not address multiple users acting at the same time.
+Shared booking and inventory state could become inconsistent under concurrent access without synchronization.
