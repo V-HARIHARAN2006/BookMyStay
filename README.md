@@ -1,52 +1,53 @@
-README Description
-Use Case 5: Booking Request Queue
+Use Case 6: Reservation Confirmation & Room Allocation
 Goal
 
-Handle multiple booking requests fairly by introducing a request intake mechanism that preserves arrival order, reflecting real-world booking behavior during peak demand.
+Confirm booking requests by assigning rooms safely while ensuring inventory consistency and preventing double-booking under all circumstances.
 
 Actor
 
-Reservation – represents a guest’s intent to book a room.
-Booking Request Queue – manages and orders incoming booking requests.
+Booking Service – processes queued booking requests and performs room allocation.
+Inventory Service – maintains and updates room availability state.
 
 Flow
-Guest submits a booking request.
-The request is added to the booking queue.
-Requests are stored in arrival order.
-Queued requests wait for processing by the allocation system.
-No inventory mutation occurs at this stage.
+Booking request is dequeued from the request queue.
+The system checks availability for the requested room type.
+A unique room ID is generated and assigned.
+The room ID is recorded to prevent reuse.
+Inventory count is decremented immediately.
+Reservation is confirmed.
 Key Concepts Used
 
-Problem of Simultaneous Requests
-During peak demand, multiple booking requests can arrive at nearly the same time. Without ordering, requests may be processed inconsistently, leading to unfair allocation.
+Problem of Double Booking
+Without controlled allocation, the same room may be assigned to multiple guests. This results in room ID collisions and inconsistent system state.
 
-Queue Data Structure
-A Queue<Reservation> is used to store booking requests. Queues naturally model waiting lines where elements are processed in sequence.
+Set Data Structure
+A Set<String> is used to store allocated room IDs. Sets enforce uniqueness by design, preventing duplicate room assignments.
 
-FIFO Principle
-FIFO (First-Come-First-Served) ensures that the earliest request is processed first. This mirrors fairness expectations in real booking systems.
+Uniqueness Enforcement
+By checking against an existing set of room IDs, the system guarantees that no room is assigned more than once. This removes the need for manual duplicate checks.
 
-Fairness
-Using a queue guarantees that no request can bypass another. All guests are treated equally based on request arrival time.
+Mapping Room Types to Assigned Rooms
+A HashMap<String, Set<String>> maps each room type to its allocated room IDs. This allows grouped tracking and simplifies validation and reporting.
 
-Request Ordering
-The queue preserves insertion order automatically. This eliminates the need for manual sorting or timestamp comparison.
+Atomic Logical Operations
+Room allocation is treated as a single logical unit. Assignment and inventory update occur together to avoid partial or inconsistent state.
 
-Decoupling Request Intake from Allocation
-Requests are collected first and processed later. This separation prepares the system for controlled allocation and concurrency handling.
+Inventory Synchronization
+Inventory is updated immediately after allocation. This ensures that availability reflects the current system state at all times.
 
 Key Requirements
-Accept booking requests from guests.
-Store requests in a queue structure.
-Preserve the order in which requests arrive.
-Ensure no room allocation or inventory updates occur at this stage.
-Prepare requests for subsequent processing.
+Retrieve booking requests from the queue in FIFO order.
+Generate and assign a unique room ID for each confirmed reservation.
+Prevent reuse of room IDs across all allocations.
+Update inventory immediately after successful allocation.
+Ensure allocation logic maintains system consistency.
 Key Benefits
-Ensures fair request handling
-Preserves arrival order automatically
-Separates booking intake from room allocation
-Prepares the system for future processing logic
+Prevents double-booking
+Ensures unique room allocation
+Maintains consistent inventory state
+Processes requests fairly in FIFO order
 Drawbacks of Previous Use Case
-Previous use case allowed room search but did not capture guest booking intent.
-No structure existed to manage multiple incoming requests.
-The system could display availability, but could not organize requests fairly for later processing
+Previous use case collected booking requests but did not confirm them.
+No room allocation mechanism existed.
+Inventory was not updated based on confirmed reservations.
+The system could not yet prevent duplicate room assignment
