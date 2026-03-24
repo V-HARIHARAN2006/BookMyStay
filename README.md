@@ -1,53 +1,52 @@
-Use Case 3: Centralized Room Inventory Management
+Use Case 4: Room Search & Availability Check
 Goal
 
-Introduce centralized inventory management by replacing scattered availability variables with a single, consistent data structure, demonstrating how HashMap solves real-world state management problems.
+Enable guests to view available rooms and their details without modifying system state, reinforcing safe data access and clear separation of responsibilities.
 
 Actor
 
-RoomInventory – responsible for managing and exposing room availability across the system.
+Guest – initiates a search to view available room options.
+Search Service – handles read-only access to inventory and room information.
 
 Flow
-The system initializes the inventory component.
-Room types are registered with their available counts.
-Availability is stored and retrieved from a centralized HashMap.
-Updates to availability are performed through controlled methods.
-The current inventory state is displayed when requested.
+Guest initiates a room search request.
+The system retrieves availability data from the inventory.
+Room details and pricing are obtained from room objects.
+Unavailable room types are filtered out.
+Available room types and their details are displayed.
+System state remains unchanged.
 Key Concepts Used
 
-Problem of Scattered State
-In the previous use case, availability was stored in separate variables. This leads to inconsistent updates, duplication, and poor scalability as the system grows.
+Read-Only Access
+Search operations are designed to read data without altering it. This prevents unintended side effects and ensures system stability.
 
-HashMap
-HashMap<String, Integer> is used to map room types to available room counts. This allows fast access, updates, and lookups based on a logical key.
-
-O(1) Lookup
-HashMap provides average constant-time complexity for get and put operations. This makes it suitable for systems that require frequent availability checks.
-
-Single Source of Truth
-All availability data is maintained in one centralized structure. This eliminates discrepancies caused by multiple variables representing the same state.
-
-Encapsulation of Inventory Logic
-Inventory-related operations are encapsulated within a dedicated class. Other parts of the system interact with inventory only through exposed methods, reducing coupling.
+Defensive Programming
+The search logic performs checks to ensure only valid and available room types are displayed. This protects the system from incorrect assumptions and invalid data usage.
 
 Separation of Concerns
-Inventory manages how many rooms are available, not what a room is. Room characteristics such as price and size remain part of the Room domain model.
+Search functionality is isolated from inventory mutation and booking logic. This ensures that searching does not interfere with allocation or availability updates.
 
-Scalability
-Adding a new room type requires only inserting a new entry into the map. No changes are required in application logic, demonstrating scalable design.
+Inventory as State Holder
+Inventory is accessed only to retrieve current availability counts. No updates are performed during search operations.
+
+Domain Model Usage
+Room objects provide descriptive information such as pricing and amenities. This avoids duplicating room-related data in the inventory layer.
+
+Validation Logic
+Room types with zero availability are excluded from the search results. This ensures that guests see only actionable options.
 
 Key Requirements
-Initialize room availability using a constructor.
-Store room availability using a HashMap.
-Provide methods to retrieve current availability.
-Support controlled updates to room availability.
-Display the centralized inventory state.
+Retrieve room availability from the centralized inventory.
+Display only room types with availability greater than zero.
+Show room details and pricing using room domain objects.
+Ensure inventory data is not modified during search operations.
+Maintain a clear boundary between search logic and booking logic.
 Key Benefits
-Eliminates scattered availability variables
-Creates a single source of truth for inventory
-Improves scalability and maintainability
-Demonstrates practical use of HashMap in real-world systems
+Safe read-only room search
+Clear separation between viewing and updating data
+Guests see only currently available room types
+Improves system clarity and maintainability
 Drawbacks of Previous Use Case
-Availability was stored in separate variables for each room type.
-Updating room counts required manual handling in multiple places.
-The design was not scalable for adding new room types.
+Previous use case centralized availability but did not provide a dedicated search flow.
+Inventory data could be viewed, but user-oriented filtered display was not implemented.
+No read-only service layer existed for guests to safely browse room options.
